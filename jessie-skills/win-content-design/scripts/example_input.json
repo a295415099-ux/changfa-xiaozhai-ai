@@ -1,0 +1,34 @@
+{
+  "core_sku": "示例产品名称",
+  "brand": "示例品牌",
+  "W": [
+    {
+      "content_direction": "示例W层内容方向（场景内容）",
+      "target_audience": "目标人群描述",
+      "content_theme": "内容主题",
+      "tone": "表达调性",
+      "platform": "平台",
+      "next_step": "→I"
+    }
+  ],
+  "I": [
+    {
+      "content_direction": "示例I层内容方向（对比测评）",
+      "target_audience": "目标人群描述",
+      "content_theme": "内容主题",
+      "pain_point": "用户痛点/比较点",
+      "platform": "平台",
+      "next_step": "→N"
+    }
+  ],
+  "N": [
+    {
+      "content_direction": "示例N层内容方向（搜索导向）",
+      "target_audience": "目标人群描述",
+      "content_theme": "内容主题",
+      "search_keyword": "搜索导向词",
+      "cta": "承接动作（导店/导商品/导直播）",
+      "platform": "平台"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "brand_name": "品牌名",
+  "core_sku": "核心SKU",
+  "content_info": {
+    "title": "内容标题",
+    "text": "内容正文/脚本",
+    "platform": "发布平台",
+    "url": "内容链接",
+    "type": "短视频/图文/达人内容/直播切片"
+  },
+  "search_words": ["关键搜索词1", "关键搜索词2"],
+  "page_info": {
+    "product_title": "商品标题",
+    "product_page": "详情页关键信息",
+    "store_page": "店铺页关键信息",
+    "activity_page": "活动页信息",
+    "live_title": "直播标题"
+  },
+  "schedule_info": {
+    "publish_time": "内容发布时间",
+    "search_optimize_time": "搜索优化时间",
+    "live_schedule": "直播排期",
+    "activity_online_time": "活动页上线时间"
+  },
+  "output": "断链检查报告.md"
+}

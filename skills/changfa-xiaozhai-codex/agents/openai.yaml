@@ -1,0 +1,7 @@
+interface:
+  display_name: "长发小寨 Codex 总控"
+  short_description: "调度长发小寨 AI 电商经营 Skill 库与外部工具"
+  default_prompt: "Use $changfa-xiaozhai-codex to diagnose my brand growth bottleneck and dispatch the right Jessie Skills."
+
+policy:
+  allow_implicit_invocation: true

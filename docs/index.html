@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>长发小寨 AI 总控工作台</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">CX</div>
+          <div>
+            <h1>长发小寨 AI 总控工作台</h1>
+            <p>品牌设计部 / 多 Agent 调度 / SOP 文档库</p>
+          </div>
+        </div>
+
+        <div class="search-box">
+          <label for="searchInput">搜索文档</label>
+          <input id="searchInput" type="search" placeholder="输入关键词、SOP、悟空、包装..." autocomplete="off">
+        </div>
+
+        <nav id="docList" class="doc-list" aria-label="文档列表"></nav>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p id="docGroup" class="eyebrow">文档库</p>
+            <h2 id="docTitle">请选择文档</h2>
+          </div>
+          <div class="actions">
+            <button id="viewButton" type="button" class="icon-button active" title="阅读模式">阅读</button>
+            <button id="editButton" type="button" class="icon-button" title="编辑模式">编辑</button>
+            <button id="copyButton" type="button" title="复制 Markdown">复制</button>
+            <button id="downloadButton" type="button" title="下载当前文档">下载</button>
+            <button id="resetButton" type="button" class="quiet" title="恢复原文">恢复</button>
+          </div>
+        </header>
+
+        <section class="notice">
+          <strong>编辑说明：</strong>
+          当前站点可在网页内编辑并保存到本机浏览器，也可复制/下载 Markdown。GitHub Pages 是静态网站，若要多人在线保存回 GitHub 仓库，需要后续接 GitHub 登录/API 或直接用 GitHub 网页编辑源文件。
+        </section>
+
+        <section id="reader" class="reader" aria-live="polite"></section>
+        <section id="editorPanel" class="editor-panel" hidden>
+          <textarea id="editor" spellcheck="false" aria-label="Markdown 编辑器"></textarea>
+          <div class="editor-status">
+            <span id="saveStatus">编辑会自动保存到当前浏览器</span>
+            <button id="saveButton" type="button">保存到浏览器</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./content.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
