@@ -1,0 +1,38 @@
+name: Build site content
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "reports/**/*.md"
+      - "templates/**/*.md"
+      - "skills/changfa-xiaozhai-codex/**/*.md"
+      - "jessie-skills/_skill_manifest.md"
+      - "assets/_资料投放说明.md"
+      - "长发小寨专属Codex蓝图.md"
+      - "scripts/build_content.py"
+
+permissions:
+  contents: write
+
+jobs:
+  build-content:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/build_content.py
+      - name: Commit generated content
+        run: |
+          if git diff --quiet docs/content.js; then
+            echo "docs/content.js is up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/content.js
+          git commit -m "Update generated site content"
+          git push

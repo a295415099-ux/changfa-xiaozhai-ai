@@ -1,4 +1,5 @@
 const docs = window.CHANGFA_DOCS || [];
+const REPO_EDIT_BASE = "https://github.com/a295415099-ux/changfa-xiaozhai-ai/edit/main/";
 const state = {
   currentId: docs[0]?.id || null,
   mode: "view",
@@ -17,6 +18,7 @@ const els = {
   editButton: document.getElementById("editButton"),
   copyButton: document.getElementById("copyButton"),
   downloadButton: document.getElementById("downloadButton"),
+  githubEditButton: document.getElementById("githubEditButton"),
   resetButton: document.getElementById("resetButton"),
   saveButton: document.getElementById("saveButton"),
   saveStatus: document.getElementById("saveStatus"),
@@ -270,6 +272,10 @@ els.viewButton.addEventListener("click", () => setMode("view"));
 els.editButton.addEventListener("click", () => setMode("edit"));
 els.downloadButton.addEventListener("click", downloadCurrent);
 els.copyButton.addEventListener("click", copyCurrent);
+els.githubEditButton.addEventListener("click", () => {
+  const doc = getDoc(state.currentId);
+  window.open(`${REPO_EDIT_BASE}${encodeURIComponent(doc.path).replaceAll("%2F", "/")}`, "_blank", "noopener,noreferrer");
+});
 els.resetButton.addEventListener("click", () => {
   const doc = getDoc(state.currentId);
   resetContent(doc);
