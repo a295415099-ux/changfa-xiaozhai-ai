@@ -287,6 +287,30 @@ button.quiet {
   color: var(--muted);
 }
 
+.reader figure {
+  margin: 18px 0 28px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f5ee;
+}
+
+.reader figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 78vh;
+  object-fit: contain;
+  background: white;
+}
+
+.reader figcaption {
+  padding: 9px 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .editor-panel {
   display: grid;
   grid-template-rows: 1fr auto;

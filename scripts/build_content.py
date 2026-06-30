@@ -1,9 +1,15 @@
 from pathlib import Path
 import json
 import re
+import shutil
 
 
 ROOT = Path(__file__).resolve().parents[1]
+DOCS_ROOT = ROOT / "docs"
+
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}
+VIDEO_EXTENSIONS = {".mp4", ".mov", ".webm"}
+DOCUMENT_EXTENSIONS = {".pdf", ".docx", ".pptx", ".xlsx", ".xls", ".csv"}
 
 
 SOURCE_GROUPS = [
@@ -40,6 +46,50 @@ def title_for(text: str, path: Path) -> str:
     return match.group(1).strip() if match else path.stem
 
 
+def markdown_asset_gallery(readme_path: Path) -> str:
+    asset_files = [
+        path for path in sorted(readme_path.parent.iterdir())
+        if path.is_file() and path.name != "README.md"
+    ]
+    if not asset_files:
+        return ""
+
+    lines = ["", "## 已收录素材", ""]
+    for path in asset_files:
+        rel = path.relative_to(ROOT / "assets").as_posix()
+        site_path = f"./assets/{rel}"
+        title = path.stem
+        suffix = path.suffix.lower()
+        if suffix in IMAGE_EXTENSIONS:
+            lines.extend([f"### {title}", "", f"![{title}]({site_path})", ""])
+        elif suffix in VIDEO_EXTENSIONS:
+            lines.extend([f"### {title}", "", f"[打开视频素材]({site_path})", ""])
+        elif suffix in DOCUMENT_EXTENSIONS:
+            lines.extend([f"- [{path.name}]({site_path})"])
+        else:
+            lines.extend([f"- [{path.name}]({site_path})"])
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def sync_assets_for_site() -> None:
+    source = ROOT / "assets"
+    target = DOCS_ROOT / "assets"
+    if not source.exists():
+        return
+
+    if target.exists():
+        shutil.rmtree(target)
+    target.mkdir(parents=True, exist_ok=True)
+
+    for path in source.rglob("*"):
+        if not path.is_file() or path.name == ".DS_Store":
+            continue
+        rel = path.relative_to(source)
+        destination = target / rel
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, destination)
+
+
 def build_docs() -> list[dict[str, str]]:
     entries = []
     seen = set()
@@ -50,6 +100,8 @@ def build_docs() -> list[dict[str, str]]:
                     continue
                 seen.add(path)
                 text = path.read_text(encoding="utf-8")
+                if path.name == "README.md" and ROOT / "assets" in path.parents:
+                    text = text.rstrip() + "\n" + markdown_asset_gallery(path)
                 entries.append({
                     "id": doc_id_for(path),
                     "title": title_for(text, path),
@@ -61,8 +113,9 @@ def build_docs() -> list[dict[str, str]]:
 
 
 def main() -> None:
+    sync_assets_for_site()
     docs = build_docs()
-    output = ROOT / "docs/content.js"
+    output = DOCS_ROOT / "content.js"
     output.write_text(
         "window.CHANGFA_DOCS = "
         + json.dumps(docs, ensure_ascii=False, indent=2)

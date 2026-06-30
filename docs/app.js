@@ -143,6 +143,14 @@ function markdownToHtml(markdown) {
       continue;
     }
 
+    const image = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (image) {
+      flushList();
+      html.push(`<figure><img src="${escapeHtml(image[2])}" alt="${escapeHtml(image[1])}" loading="lazy"><figcaption>${escapeHtml(image[1])}</figcaption></figure>`);
+      index += 1;
+      continue;
+    }
+
     const heading = trimmed.match(/^(#{1,4})\s+(.+)$/);
     if (heading) {
       flushList();
