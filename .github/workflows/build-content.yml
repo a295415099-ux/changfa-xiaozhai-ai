@@ -9,7 +9,7 @@ on:
       - "templates/**/*.md"
       - "skills/changfa-xiaozhai-codex/**/*.md"
       - "jessie-skills/_skill_manifest.md"
-      - "assets/_资料投放说明.md"
+      - "assets/**/*.md"
       - "长发小寨专属Codex蓝图.md"
       - "scripts/build_content.py"
 

@@ -166,5 +166,61 @@ window.CHANGFA_DOCS = [
     "group": "资料库说明",
     "path": "assets/_资料投放说明.md",
     "markdown": "# 长发小寨资料库投放说明\n\n## 目录用途\n\n| 目录 | 放什么 |\n|---|---|\n| `brand/` | 品牌定位、VI、LOGO、色彩、字体、品牌故事、品牌规范 |\n| `sku/` | 单品资料、产品图、卖点、规格、价格、用户评价、客服问题 |\n| `ecommerce/` | 店铺首页、主图、详情页、活动页、投放素材、电商数据 |\n| `social/` | 小红书、抖音、视频号、公众号、私域内容与数据 |\n| `packaging/` | 包装图、包装源文件、尺寸、材质、打样、供应链要求 |\n| `data/` | 搜索、投放、成交、转化、复购、内容表现等数据表 |\n| `reviews/` | 用户评价、问大家、客服聊天、达人反馈、社媒评论 |\n| `references/` | 竞品、行业案例、设计参考、课程资料、外部链接 |\n\n## 建议命名\n\n文件名尽量包含：日期、品牌/产品、渠道、用途。\n\n示例：\n\n- `2026-06-核心SKUA-详情页截图.png`\n- `2026-06-小红书爆文评论整理.xlsx`\n- `2026-06-新品包装打样反馈.md`\n- `2026-06-品牌VI规范.pdf`\n\n## 最推荐先放的资料\n\n1. 品牌 VI 或现有品牌规范。\n2. 3 个核心 SKU 的商品图、详情页、包装图。\n3. 小红书/抖音表现最好和最差的内容各 5 条。\n4. 电商搜索词、主图点击、详情页转化、投放素材数据。\n5. 当前设计部人员分工和需求流转方式。\n\n"
+  },
+  {
+    "id": "assets-brand-readme-md",
+    "title": "品牌资料库",
+    "group": "资料库说明",
+    "path": "assets/brand/README.md",
+    "markdown": "# 品牌资料库\n\n这里放品牌定位、VI、LOGO、色彩、字体、品牌故事、品牌视觉规范和禁用表达。\n\n"
+  },
+  {
+    "id": "assets-data-readme-md",
+    "title": "数据资料库",
+    "group": "资料库说明",
+    "path": "assets/data/README.md",
+    "markdown": "# 数据资料库\n\n这里放搜索、投放、成交、转化、复购、内容表现、页面表现等数据文件。\n\n"
+  },
+  {
+    "id": "assets-ecommerce-readme-md",
+    "title": "电商资料库",
+    "group": "资料库说明",
+    "path": "assets/ecommerce/README.md",
+    "markdown": "# 电商资料库\n\n这里放 `AI项目01：淘内承接阵地优化项目` 需要的商详页面、店铺首页、主图、活动页、投放素材和电商页面数据。\n\n## 优先放这些资料\n\n| 资料 | 示例 |\n|---|---|\n| 店铺首页 | 首页截图、首页链接、首页模块说明 |\n| 商详页面 | 核心 SKU 详情页截图、链接、首屏、卖点模块 |\n| 主图 | 当前主图、历史主图、高点击主图 |\n| 活动页 | 大促页、会员页、承接页、落地页 |\n| 投放素材 | 万相台/超级短视频/搜索广告素材 |\n| 页面数据 | 点击率、跳失率、收藏加购、转化率、ROI |\n\n## 建议命名\n\n```text\n2026-06-核心SKU-商详页截图.png\n2026-06-店铺首页截图.png\n2026-06-主图点击数据.xlsx\n2026-06-活动页承接数据.xlsx\n```\n\n## 和 AI项目01 的关系\n\n商详页面、首页、活动页、主图、店铺承接相关资料，都先放在这里。Codex 会把这些资料归入：\n\n`AI项目01：淘内承接阵地优化项目`\n\n"
+  },
+  {
+    "id": "assets-packaging-readme-md",
+    "title": "包装资料库",
+    "group": "资料库说明",
+    "path": "assets/packaging/README.md",
+    "markdown": "# 包装资料库\n\n这里放包装设计图、源文件、尺寸、材质、工艺、打样记录、供应链要求和用户对包装的反馈。\n\n"
+  },
+  {
+    "id": "assets-references-readme-md",
+    "title": "参考资料库",
+    "group": "资料库说明",
+    "path": "assets/references/README.md",
+    "markdown": "# 参考资料库\n\n这里放竞品案例、行业资料、设计参考、课程资料、外部链接和调研材料。\n\n"
+  },
+  {
+    "id": "assets-reviews-readme-md",
+    "title": "评价与反馈资料库",
+    "group": "资料库说明",
+    "path": "assets/reviews/README.md",
+    "markdown": "# 评价与反馈资料库\n\n这里放用户评价、问大家、客服聊天记录、社媒评论、达人反馈和用户顾虑整理。\n\n"
+  },
+  {
+    "id": "assets-sku-readme-md",
+    "title": "SKU 资料库",
+    "group": "资料库说明",
+    "path": "assets/sku/README.md",
+    "markdown": "# SKU 资料库\n\n这里按产品/SKU 存放产品图、卖点、规格、价格、包装、评价、问大家、客服高频问题和信任证据。\n\n"
+  },
+  {
+    "id": "assets-social-readme-md",
+    "title": "社媒资料库",
+    "group": "资料库说明",
+    "path": "assets/social/README.md",
+    "markdown": "# 社媒资料库\n\n这里放小红书、抖音、视频号、公众号、私域内容、达人素材、评论反馈和社媒数据。\n\n"
   }
 ];
