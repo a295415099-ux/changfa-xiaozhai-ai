@@ -4,6 +4,7 @@ const state = {
   currentId: docs[0]?.id || null,
   mode: "view",
   query: "",
+  lightboxMode: "fit",
 };
 
 const els = {
@@ -22,6 +23,33 @@ const els = {
   resetButton: document.getElementById("resetButton"),
   saveButton: document.getElementById("saveButton"),
   saveStatus: document.getElementById("saveStatus"),
+};
+
+const lightbox = document.createElement("div");
+lightbox.className = "lightbox";
+lightbox.hidden = true;
+lightbox.innerHTML = `
+  <div class="lightbox-toolbar">
+    <div class="lightbox-title" id="lightboxTitle"></div>
+    <div class="lightbox-actions">
+      <button type="button" id="lightboxModeButton">按宽度查看</button>
+      <a id="lightboxOpenButton" href="#" target="_blank" rel="noreferrer">原图</a>
+      <button type="button" id="lightboxCloseButton">关闭</button>
+    </div>
+  </div>
+  <div class="lightbox-stage" id="lightboxStage">
+    <img id="lightboxImage" alt="">
+  </div>
+`;
+document.body.appendChild(lightbox);
+
+const lightboxEls = {
+  title: document.getElementById("lightboxTitle"),
+  image: document.getElementById("lightboxImage"),
+  stage: document.getElementById("lightboxStage"),
+  modeButton: document.getElementById("lightboxModeButton"),
+  openButton: document.getElementById("lightboxOpenButton"),
+  closeButton: document.getElementById("lightboxCloseButton"),
 };
 
 function storageKey(id) {
@@ -146,7 +174,14 @@ function markdownToHtml(markdown) {
     const image = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
     if (image) {
       flushList();
-      html.push(`<figure><img src="${escapeHtml(image[2])}" alt="${escapeHtml(image[1])}" loading="lazy"><figcaption>${escapeHtml(image[1])}</figcaption></figure>`);
+      html.push(`
+        <figure class="asset-figure">
+          <button class="asset-preview" type="button" data-image-src="${escapeHtml(image[2])}" data-image-title="${escapeHtml(image[1])}" aria-label="全屏查看 ${escapeHtml(image[1])}">
+            <img src="${escapeHtml(image[2])}" alt="${escapeHtml(image[1])}" loading="lazy">
+          </button>
+          <figcaption>${escapeHtml(image[1])}</figcaption>
+        </figure>
+      `);
       index += 1;
       continue;
     }
@@ -263,6 +298,30 @@ async function copyCurrent() {
   els.saveStatus.textContent = "已复制当前 Markdown";
 }
 
+function setLightboxMode(mode) {
+  state.lightboxMode = mode;
+  lightbox.classList.toggle("fit-width", mode === "width");
+  lightboxEls.modeButton.textContent = mode === "fit" ? "按宽度查看" : "适应屏幕";
+  lightboxEls.stage.scrollTo({ top: 0, left: 0 });
+}
+
+function openLightbox(src, title) {
+  lightboxEls.image.src = src;
+  lightboxEls.image.alt = title;
+  lightboxEls.title.textContent = title || "图片预览";
+  lightboxEls.openButton.href = src;
+  lightbox.hidden = false;
+  document.body.classList.add("lightbox-open");
+  setLightboxMode("fit");
+  lightboxEls.closeButton.focus();
+}
+
+function closeLightbox() {
+  lightbox.hidden = true;
+  lightboxEls.image.removeAttribute("src");
+  document.body.classList.remove("lightbox-open");
+}
+
 els.docList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-id]");
   if (!button) return;
@@ -274,6 +333,23 @@ els.docList.addEventListener("click", (event) => {
 els.searchInput.addEventListener("input", (event) => {
   state.query = event.target.value;
   renderNav();
+});
+
+els.reader.addEventListener("click", (event) => {
+  const preview = event.target.closest("[data-image-src]");
+  if (!preview) return;
+  openLightbox(preview.dataset.imageSrc, preview.dataset.imageTitle);
+});
+
+lightboxEls.closeButton.addEventListener("click", closeLightbox);
+lightboxEls.modeButton.addEventListener("click", () => {
+  setLightboxMode(state.lightboxMode === "fit" ? "width" : "fit");
+});
+lightbox.addEventListener("click", (event) => {
+  if (event.target === lightbox) closeLightbox();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !lightbox.hidden) closeLightbox();
 });
 
 els.viewButton.addEventListener("click", () => setMode("view"));
