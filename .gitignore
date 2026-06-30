@@ -8,6 +8,7 @@
 # Temporary files
 *.tmp
 *.log
+tmp/
 
 # Local command-line tools installed for this machine
 tools/
