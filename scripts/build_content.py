@@ -1,4 +1,5 @@
 from pathlib import Path
+import hashlib
 import json
 import re
 import shutil
@@ -25,6 +26,7 @@ SOURCE_GROUPS = [
         "08_*.md",
         "09_*.md",
         "10_*.md",
+        "11_*.md",
         "99_*.md",
     ]),
     ("模板库", ROOT / "templates", ["*.md"]),
@@ -33,12 +35,15 @@ SOURCE_GROUPS = [
     ("架构与总控", ROOT / "skills/changfa-xiaozhai-codex/references", ["*.md"]),
     ("Jessie Skill库", ROOT / "jessie-skills", ["_skill_manifest.md"]),
     ("资料库说明", ROOT / "assets", ["_资料投放说明.md", "*/README.md"]),
+    ("电商资料库", ROOT / "assets/ecommerce", ["*/README.md"]),
 ]
 
 
 def doc_id_for(path: Path) -> str:
     rel = path.relative_to(ROOT).as_posix()
-    return re.sub(r"[^a-zA-Z0-9]+", "-", rel).strip("-").lower()
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", rel).strip("-").lower()
+    digest = hashlib.sha1(rel.encode("utf-8")).hexdigest()[:8]
+    return f"{slug or 'doc'}-{digest}"
 
 
 def title_for(text: str, path: Path) -> str:
@@ -49,7 +54,7 @@ def title_for(text: str, path: Path) -> str:
 def markdown_asset_gallery(readme_path: Path) -> str:
     asset_files = [
         path for path in sorted(readme_path.parent.iterdir())
-        if path.is_file() and path.name != "README.md"
+        if path.is_file() and path.name not in {"README.md", ".DS_Store"}
     ]
     if not asset_files:
         return ""
