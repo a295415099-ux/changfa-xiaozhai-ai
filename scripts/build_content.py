@@ -34,6 +34,7 @@ SOURCE_GROUPS = [
     ("架构与总控", ROOT / "skills/changfa-xiaozhai-codex", ["SKILL.md"]),
     ("架构与总控", ROOT / "skills/changfa-xiaozhai-codex/references", ["*.md"]),
     ("Jessie Skill库", ROOT / "jessie-skills", ["_skill_manifest.md"]),
+    ("AI项目执行", ROOT / "projects", ["**/*.md"]),
     ("资料库说明", ROOT / "assets", ["_资料投放说明.md", "*/README.md"]),
     ("电商资料库", ROOT / "assets/ecommerce", ["*/README.md"]),
 ]
