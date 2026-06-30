@@ -29,6 +29,7 @@ SOURCE_GROUPS = [
         "11_*.md",
         "12_*.md",
         "13_*.md",
+        "14_*.md",
         "99_*.md",
     ]),
     ("模板库", ROOT / "templates", ["*.md"]),
