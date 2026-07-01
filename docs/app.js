@@ -1,20 +1,34 @@
 const docs = window.CHANGFA_DOCS || [];
 const REPO_EDIT_BASE = "https://github.com/a295415099-ux/changfa-xiaozhai-ai/edit/main/";
+
 const state = {
   currentId: docs[0]?.id || null,
   mode: "view",
   query: "",
+  activeGroup: "全部",
   lightboxMode: "fit",
 };
 
 const els = {
+  sidebar: document.getElementById("sidebar"),
+  sidebarBackdrop: document.getElementById("sidebarBackdrop"),
+  mobileMenuButton: document.getElementById("mobileMenuButton"),
+  sidebarCloseButton: document.getElementById("sidebarCloseButton"),
+  mobileDocGroup: document.getElementById("mobileDocGroup"),
+  totalDocs: document.getElementById("totalDocs"),
+  totalGroups: document.getElementById("totalGroups"),
+  resultCount: document.getElementById("resultCount"),
+  groupFilters: document.getElementById("groupFilters"),
+  mobileGroupFilters: document.getElementById("mobileGroupFilters"),
   docList: document.getElementById("docList"),
   docGroup: document.getElementById("docGroup"),
   docTitle: document.getElementById("docTitle"),
+  docPath: document.getElementById("docPath"),
   reader: document.getElementById("reader"),
   editorPanel: document.getElementById("editorPanel"),
   editor: document.getElementById("editor"),
   searchInput: document.getElementById("searchInput"),
+  mobileSearchInput: document.getElementById("mobileSearchInput"),
   viewButton: document.getElementById("viewButton"),
   editButton: document.getElementById("editButton"),
   copyButton: document.getElementById("copyButton"),
@@ -23,7 +37,10 @@ const els = {
   resetButton: document.getElementById("resetButton"),
   saveButton: document.getElementById("saveButton"),
   saveStatus: document.getElementById("saveStatus"),
+  editorHint: document.getElementById("editorHint"),
 };
+
+const groups = ["全部", ...Array.from(new Set(docs.map((doc) => doc.group)))];
 
 const lightbox = document.createElement("div");
 lightbox.className = "lightbox";
@@ -64,14 +81,19 @@ function getContent(doc) {
   return localStorage.getItem(storageKey(doc.id)) || doc.markdown;
 }
 
+function setStatus(message) {
+  els.saveStatus.textContent = message;
+  els.editorHint.textContent = message;
+}
+
 function setContent(doc, value) {
   localStorage.setItem(storageKey(doc.id), value);
-  els.saveStatus.textContent = "已保存到当前浏览器";
+  setStatus("已保存到当前浏览器");
 }
 
 function resetContent(doc) {
   localStorage.removeItem(storageKey(doc.id));
-  els.saveStatus.textContent = "已恢复原文";
+  setStatus("已恢复原文");
 }
 
 function escapeHtml(value) {
@@ -96,21 +118,16 @@ function parseTable(lines, startIndex) {
     rows.push(lines[index].trim());
     index += 1;
   }
-  if (rows.length < 2 || !/^\|[\s:-|]+\|$/.test(rows[1])) {
-    return null;
-  }
+  if (rows.length < 2 || !/^\|[\s:-|]+\|$/.test(rows[1])) return null;
   const htmlRows = rows
     .filter((_, rowIndex) => rowIndex !== 1)
     .map((row, rowIndex) => {
-      const cells = row
-        .slice(1, -1)
-        .split("|")
-        .map((cell) => cell.trim());
+      const cells = row.slice(1, -1).split("|").map((cell) => cell.trim());
       const tag = rowIndex === 0 ? "th" : "td";
       return `<tr>${cells.map((cell) => `<${tag}>${inlineMarkdown(cell)}</${tag}>`).join("")}</tr>`;
     })
     .join("");
-  return { html: `<table>${htmlRows}</table>`, nextIndex: index };
+  return { html: `<div class="table-wrap"><table>${htmlRows}</table></div>`, nextIndex: index };
 }
 
 function markdownToHtml(markdown) {
@@ -215,46 +232,100 @@ function markdownToHtml(markdown) {
   }
 
   flushList();
-  if (inCode) {
-    html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
-  }
+  if (inCode) html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
   return html.join("\n");
 }
 
+function docSummary(doc) {
+  const text = doc.markdown
+    .replace(/^#.+$/m, "")
+    .replace(/[`#>*|\-[\]()]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.slice(0, 78);
+}
+
+function getFilteredDocs() {
+  const query = state.query.trim().toLowerCase();
+  return docs.filter((doc) => {
+    const groupMatch = state.activeGroup === "全部" || doc.group === state.activeGroup;
+    if (!groupMatch) return false;
+    if (!query) return true;
+    return `${doc.title} ${doc.group} ${doc.path} ${doc.markdown}`.toLowerCase().includes(query);
+  });
+}
+
 function groupDocs(filteredDocs) {
-  return filteredDocs.reduce((groups, doc) => {
-    if (!groups[doc.group]) groups[doc.group] = [];
-    groups[doc.group].push(doc);
-    return groups;
+  return filteredDocs.reduce((result, doc) => {
+    if (!result[doc.group]) result[doc.group] = [];
+    result[doc.group].push(doc);
+    return result;
   }, {});
 }
 
+function renderStats(filteredDocs) {
+  els.totalDocs.textContent = docs.length;
+  els.totalGroups.textContent = groups.length - 1;
+  els.resultCount.textContent = filteredDocs.length;
+}
+
+function renderGroupFilters(filteredDocs) {
+  const counts = docs.reduce((result, doc) => {
+    result[doc.group] = (result[doc.group] || 0) + 1;
+    return result;
+  }, {});
+  const buttons = groups.map((group) => {
+    const active = state.activeGroup === group ? " active" : "";
+    const count = group === "全部" ? docs.length : counts[group] || 0;
+    return `<button class="filter-chip${active}" type="button" data-group="${escapeHtml(group)}">${escapeHtml(group)}<span>${count}</span></button>`;
+  }).join("");
+  els.groupFilters.innerHTML = buttons;
+  els.mobileGroupFilters.innerHTML = buttons;
+  els.resultCount.textContent = filteredDocs.length;
+}
+
 function renderNav() {
-  const query = state.query.trim().toLowerCase();
-  const filtered = docs.filter((doc) => {
-    if (!query) return true;
-    return `${doc.title} ${doc.group} ${doc.markdown}`.toLowerCase().includes(query);
-  });
-  const groups = groupDocs(filtered);
-  els.docList.innerHTML = Object.entries(groups)
+  const filtered = getFilteredDocs();
+  const grouped = groupDocs(filtered);
+  renderStats(filtered);
+  renderGroupFilters(filtered);
+
+  if (!filtered.length) {
+    els.docList.innerHTML = `
+      <div class="empty-state">
+        <strong>没有匹配结果</strong>
+        <span>换一个关键词，或切回“全部”。</span>
+      </div>
+    `;
+    return;
+  }
+
+  els.docList.innerHTML = Object.entries(grouped)
     .map(([group, groupDocs]) => {
-      const buttons = groupDocs
-        .map((doc) => {
-          const selected = doc.id === state.currentId ? " selected" : "";
-          return `<button class="doc-button${selected}" type="button" data-id="${doc.id}">${escapeHtml(doc.title)}</button>`;
-        })
-        .join("");
-      return `<section><h3 class="group-title">${escapeHtml(group)}</h3>${buttons}</section>`;
+      const cards = groupDocs.map((doc) => {
+        const selected = doc.id === state.currentId ? " selected" : "";
+        return `
+          <button class="doc-card${selected}" type="button" data-id="${doc.id}">
+            <span class="doc-card-title">${escapeHtml(doc.title)}</span>
+            <span class="doc-card-summary">${escapeHtml(docSummary(doc))}</span>
+            <span class="doc-card-path">${escapeHtml(doc.path)}</span>
+          </button>
+        `;
+      }).join("");
+      return `<section class="doc-group"><h3>${escapeHtml(group)}<span>${groupDocs.length}</span></h3>${cards}</section>`;
     })
     .join("");
 }
 
 function renderDocument() {
   const doc = getDoc(state.currentId);
+  if (!doc) return;
   const content = getContent(doc);
   state.currentId = doc.id;
   els.docGroup.textContent = doc.group;
+  els.mobileDocGroup.textContent = doc.group;
   els.docTitle.textContent = doc.title;
+  els.docPath.textContent = doc.path;
   els.reader.innerHTML = markdownToHtml(content);
   els.editor.value = content;
   els.reader.hidden = state.mode !== "view";
@@ -267,6 +338,39 @@ function renderDocument() {
 function setMode(mode) {
   state.mode = mode;
   renderDocument();
+}
+
+function setGroup(group) {
+  state.activeGroup = group;
+  const filtered = getFilteredDocs();
+  if (filtered.length && !filtered.some((doc) => doc.id === state.currentId)) {
+    state.currentId = filtered[0].id;
+    setStatus("已切换到当前栏目第一篇");
+  }
+  renderDocument();
+}
+
+function setQuery(value) {
+  state.query = value;
+  els.searchInput.value = value;
+  els.mobileSearchInput.value = value;
+  const filtered = getFilteredDocs();
+  if (filtered.length && !filtered.some((doc) => doc.id === state.currentId)) {
+    state.currentId = filtered[0].id;
+  }
+  renderDocument();
+}
+
+function openSidebar() {
+  els.sidebar.classList.add("open");
+  els.sidebarBackdrop.hidden = false;
+  document.body.classList.add("nav-open");
+}
+
+function closeSidebar() {
+  els.sidebar.classList.remove("open");
+  els.sidebarBackdrop.hidden = true;
+  document.body.classList.remove("nav-open");
 }
 
 function downloadCurrent() {
@@ -295,7 +399,7 @@ async function copyCurrent() {
     document.execCommand("copy");
     temp.remove();
   }
-  els.saveStatus.textContent = "已复制当前 Markdown";
+  setStatus("已复制当前 Markdown");
 }
 
 function setLightboxMode(mode) {
@@ -322,18 +426,29 @@ function closeLightbox() {
   document.body.classList.remove("lightbox-open");
 }
 
+function handleFilterClick(event) {
+  const button = event.target.closest("[data-group]");
+  if (!button) return;
+  setGroup(button.dataset.group);
+}
+
 els.docList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-id]");
   if (!button) return;
   state.currentId = button.dataset.id;
-  els.saveStatus.textContent = "编辑会自动保存到当前浏览器";
+  setStatus("网页内编辑会保存到当前浏览器");
   renderDocument();
+  closeSidebar();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
-els.searchInput.addEventListener("input", (event) => {
-  state.query = event.target.value;
-  renderNav();
-});
+els.groupFilters.addEventListener("click", handleFilterClick);
+els.mobileGroupFilters.addEventListener("click", handleFilterClick);
+els.searchInput.addEventListener("input", (event) => setQuery(event.target.value));
+els.mobileSearchInput.addEventListener("input", (event) => setQuery(event.target.value));
+els.mobileMenuButton.addEventListener("click", openSidebar);
+els.sidebarCloseButton.addEventListener("click", closeSidebar);
+els.sidebarBackdrop.addEventListener("click", closeSidebar);
 
 els.reader.addEventListener("click", (event) => {
   const preview = event.target.closest("[data-image-src]");
@@ -349,7 +464,10 @@ lightbox.addEventListener("click", (event) => {
   if (event.target === lightbox) closeLightbox();
 });
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !lightbox.hidden) closeLightbox();
+  if (event.key === "Escape") {
+    if (!lightbox.hidden) closeLightbox();
+    closeSidebar();
+  }
 });
 
 els.viewButton.addEventListener("click", () => setMode("view"));
