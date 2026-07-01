@@ -1,20 +1,20 @@
 :root {
-  --bg: #f5f7f8;
+  --bg: #f7f7f7;
   --surface: #ffffff;
-  --surface-muted: #f0f4f3;
-  --sidebar: #17231f;
-  --sidebar-2: #20332d;
-  --text: #1d252c;
-  --muted: #65727e;
-  --line: #d8e0df;
-  --line-dark: rgba(255, 255, 255, 0.14);
-  --green: #176a57;
-  --green-strong: #0f4d41;
-  --green-soft: #e4f1ed;
-  --red: #a43f3a;
-  --blue: #315b87;
-  --gold: #9c7437;
-  --shadow: 0 18px 50px rgba(16, 28, 34, 0.12);
+  --surface-muted: #f4f4f4;
+  --sidebar: #ffffff;
+  --sidebar-2: #fff1f2;
+  --text: #1f1f1f;
+  --muted: #6f7479;
+  --line: #e4e4e4;
+  --line-dark: #ededed;
+  --green: #e41e2b;
+  --green-strong: #b40017;
+  --green-soft: #fff1f2;
+  --red: #e41e2b;
+  --blue: #111111;
+  --gold: #111111;
+  --shadow: 0 18px 50px rgba(20, 20, 20, 0.1);
   --radius: 8px;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
@@ -90,7 +90,8 @@ button.quiet {
   overflow: auto;
   padding: 20px;
   background: var(--sidebar);
-  color: #f7fbfa;
+  color: var(--text);
+  border-right: 1px solid var(--line);
 }
 
 .sidebar-header {
@@ -113,10 +114,10 @@ button.quiet {
   place-items: center;
   width: 48px;
   height: 48px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--red);
   border-radius: 8px;
-  background: #f7fbfa;
-  color: var(--green-strong);
+  background: var(--red);
+  color: #fff;
   font-weight: 900;
   letter-spacing: 0;
 }
@@ -129,7 +130,7 @@ button.quiet {
 
 .brand-block p {
   margin: 6px 0 0;
-  color: rgba(247, 251, 250, 0.68);
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -147,7 +148,7 @@ button.quiet {
 
 .overview-grid div {
   min-width: 0;
-  border: 1px solid var(--line-dark);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 10px;
   background: var(--sidebar-2);
@@ -162,7 +163,7 @@ button.quiet {
 .overview-grid span {
   display: block;
   margin-top: 6px;
-  color: rgba(247, 251, 250, 0.62);
+  color: var(--muted);
   font-size: 12px;
 }
 
@@ -173,7 +174,7 @@ button.quiet {
 .search-box label {
   display: block;
   margin-bottom: 7px;
-  color: rgba(247, 251, 250, 0.74);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 700;
 }
@@ -214,9 +215,9 @@ button.quiet {
   gap: 7px;
   min-height: 34px;
   padding: 0 10px;
-  border-color: var(--line-dark);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(247, 251, 250, 0.9);
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--text);
   white-space: nowrap;
 }
 
@@ -228,12 +229,14 @@ button.quiet {
   min-height: 20px;
   border-radius: 999px;
   padding: 0 5px;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--green-soft);
+  color: var(--red);
   font-size: 11px;
 }
 
 .filter-chip.active span {
   background: rgba(255, 255, 255, 0.22);
+  color: #fff;
 }
 
 .doc-list {
@@ -248,42 +251,59 @@ button.quiet {
   justify-content: space-between;
   align-items: center;
   margin: 0 0 8px;
-  color: rgba(247, 251, 250, 0.8);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 800;
 }
 
 .doc-group h3 span {
-  color: rgba(247, 251, 250, 0.5);
+  color: var(--red);
 }
 
 .doc-card {
+  position: relative;
   display: block;
   width: 100%;
   min-height: 0;
   margin-bottom: 8px;
-  padding: 12px;
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.055);
-  color: #f7fbfa;
+  padding: 12px 12px 12px 54px;
+  border-color: var(--line);
+  background: #fff;
+  color: var(--text);
   text-align: left;
 }
 
 .doc-card:hover,
 .doc-card.selected {
-  border-color: rgba(255, 255, 255, 0.34);
-  background: rgba(255, 255, 255, 0.11);
-  color: #fff;
+  border-color: rgba(228, 30, 43, 0.36);
+  background: #fff7f7;
+  color: var(--text);
 }
 
 .doc-card.selected {
-  box-shadow: inset 4px 0 0 #76c8ae;
+  box-shadow: inset 4px 0 0 var(--red);
 }
 
 .doc-card-title,
+.doc-card-number,
 .doc-card-summary,
 .doc-card-path {
   display: block;
+}
+
+.doc-card-number {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--red);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .doc-card-title {
@@ -293,7 +313,7 @@ button.quiet {
 
 .doc-card-summary {
   margin-top: 6px;
-  color: rgba(247, 251, 250, 0.66);
+  color: var(--muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -301,17 +321,17 @@ button.quiet {
 .doc-card-path {
   margin-top: 8px;
   overflow: hidden;
-  color: rgba(247, 251, 250, 0.42);
+  color: #999;
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .empty-state {
-  border: 1px dashed rgba(255, 255, 255, 0.22);
+  border: 1px dashed var(--line);
   border-radius: var(--radius);
   padding: 18px;
-  color: rgba(247, 251, 250, 0.72);
+  color: var(--muted);
 }
 
 .empty-state strong,
@@ -346,6 +366,22 @@ button.quiet {
   color: var(--green);
   font-size: 13px;
   font-weight: 850;
+}
+
+.page-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  min-height: 34px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(228, 30, 43, 0.24);
+  border-radius: var(--radius);
+  background: var(--green-soft);
+  color: var(--red);
+  font-size: 20px;
+  font-weight: 950;
+  letter-spacing: 0;
 }
 
 .command-panel h2 {
@@ -697,7 +733,8 @@ button.quiet {
 
   .menu-button {
     min-width: 58px;
-    background: var(--sidebar);
+    border-color: var(--red);
+    background: var(--red);
     color: #fff;
   }
 
@@ -745,8 +782,8 @@ button.quiet {
   .close-button {
     display: inline-flex;
     flex: 0 0 auto;
-    border-color: var(--line-dark);
-    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--red);
+    background: var(--red);
     color: #fff;
   }
 

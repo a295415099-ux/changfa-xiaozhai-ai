@@ -11,9 +11,11 @@ DOCS_ROOT = ROOT / "docs"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".webm"}
 DOCUMENT_EXTENSIONS = {".pdf", ".docx", ".pptx", ".xlsx", ".xls", ".csv"}
+PUBLIC_EXCLUDED_GROUPS = {"汇报文件包"}
 
 
 SOURCE_GROUPS = [
+    ("总控导航", ROOT / "reports/总控台导航", ["00_*.md"]),
     ("汇报文件包", ROOT / "reports/品牌设计部AI汇报文件包", [
         "00_*.md",
         "01_*.md",
@@ -104,6 +106,8 @@ def build_docs() -> list[dict[str, str]]:
     entries = []
     seen = set()
     for group, base, patterns in SOURCE_GROUPS:
+        if group in PUBLIC_EXCLUDED_GROUPS:
+            continue
         for pattern in patterns:
             for path in sorted(base.glob(pattern)):
                 if path in seen or not path.exists():
@@ -125,6 +129,8 @@ def build_docs() -> list[dict[str, str]]:
 def main() -> None:
     sync_assets_for_site()
     docs = build_docs()
+    for index, doc in enumerate(docs, start=1):
+        doc["number"] = f"{index:02d}"
     output = DOCS_ROOT / "content.js"
     output.write_text(
         "window.CHANGFA_DOCS = "

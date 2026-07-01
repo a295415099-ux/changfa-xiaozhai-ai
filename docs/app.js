@@ -22,6 +22,7 @@ const els = {
   mobileGroupFilters: document.getElementById("mobileGroupFilters"),
   docList: document.getElementById("docList"),
   docGroup: document.getElementById("docGroup"),
+  pageNumber: document.getElementById("pageNumber"),
   docTitle: document.getElementById("docTitle"),
   docPath: document.getElementById("docPath"),
   reader: document.getElementById("reader"),
@@ -306,6 +307,7 @@ function renderNav() {
         const selected = doc.id === state.currentId ? " selected" : "";
         return `
           <button class="doc-card${selected}" type="button" data-id="${doc.id}">
+            <span class="doc-card-number">${escapeHtml(doc.number || "--")}</span>
             <span class="doc-card-title">${escapeHtml(doc.title)}</span>
             <span class="doc-card-summary">${escapeHtml(docSummary(doc))}</span>
             <span class="doc-card-path">${escapeHtml(doc.path)}</span>
@@ -324,6 +326,7 @@ function renderDocument() {
   state.currentId = doc.id;
   els.docGroup.textContent = doc.group;
   els.mobileDocGroup.textContent = doc.group;
+  els.pageNumber.textContent = doc.number || "--";
   els.docTitle.textContent = doc.title;
   els.docPath.textContent = doc.path;
   els.reader.innerHTML = markdownToHtml(content);
