@@ -121,7 +121,7 @@ async function main() {
     alignment: "center",
   });
 
-  addText(slide, "AI项目01：淘内承接阵地优化项目", { left: 86, top: 676, width: 540, height: 28 }, {
+  addText(slide, "AI项目01：天猫首页及发膜0627设计初稿", { left: 86, top: 676, width: 540, height: 28 }, {
     fontSize: 16,
     bold: true,
     color: "#0f5148",
