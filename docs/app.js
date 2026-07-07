@@ -1,5 +1,16 @@
 const docs = window.CHANGFA_DOCS || [];
 const REPO_EDIT_BASE = "https://github.com/a295415099-ux/changfa-xiaozhai-ai/edit/main/";
+const APP_STORAGE_VERSION = "20260707-dashboard-redesign";
+const GROUP_ORDER = [
+  "总控导航",
+  "AI项目执行",
+  "电商资料库",
+  "资料库说明",
+  "模板库",
+  "架构与总控",
+  "竞品分析",
+  "Jessie Skill库",
+];
 
 const state = {
   currentId: docs[0]?.id || null,
@@ -41,7 +52,17 @@ const els = {
   editorHint: document.getElementById("editorHint"),
 };
 
-const groups = ["全部", ...Array.from(new Set(docs.map((doc) => doc.group)))];
+const groups = [
+  "全部",
+  ...Array.from(new Set(docs.map((doc) => doc.group))).sort((a, b) => {
+    const indexA = GROUP_ORDER.indexOf(a);
+    const indexB = GROUP_ORDER.indexOf(b);
+    if (indexA !== -1 || indexB !== -1) {
+      return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+    }
+    return a.localeCompare(b, "zh-CN");
+  }),
+];
 
 const lightbox = document.createElement("div");
 lightbox.className = "lightbox";
@@ -71,7 +92,7 @@ const lightboxEls = {
 };
 
 function storageKey(id) {
-  return `changfa-doc:${id}`;
+  return `changfa-doc:${APP_STORAGE_VERSION}:${id}`;
 }
 
 function getDoc(id) {
@@ -302,6 +323,7 @@ function renderNav() {
   }
 
   els.docList.innerHTML = Object.entries(grouped)
+    .sort(([groupA], [groupB]) => groups.indexOf(groupA) - groups.indexOf(groupB))
     .map(([group, groupDocs]) => {
       const cards = groupDocs.map((doc) => {
         const selected = doc.id === state.currentId ? " selected" : "";
@@ -344,7 +366,11 @@ function setMode(mode) {
 }
 
 function setGroup(group) {
+  if (!groups.includes(group)) return;
   state.activeGroup = group;
+  state.query = "";
+  els.searchInput.value = "";
+  els.mobileSearchInput.value = "";
   const filtered = getFilteredDocs();
   if (filtered.length && !filtered.some((doc) => doc.id === state.currentId)) {
     state.currentId = filtered[0].id;
@@ -355,6 +381,7 @@ function setGroup(group) {
 
 function setQuery(value) {
   state.query = value;
+  if (value.trim()) state.activeGroup = "全部";
   els.searchInput.value = value;
   els.mobileSearchInput.value = value;
   const filtered = getFilteredDocs();
@@ -435,6 +462,19 @@ function handleFilterClick(event) {
   setGroup(button.dataset.group);
 }
 
+function handleRouteClick(event) {
+  const button = event.target.closest("[data-route-group], [data-route-query]");
+  if (!button) return;
+  if (button.dataset.routeGroup) {
+    setGroup(button.dataset.routeGroup);
+  }
+  if (button.dataset.routeQuery) {
+    setQuery(button.dataset.routeQuery);
+  }
+  closeSidebar();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 els.docList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-id]");
   if (!button) return;
@@ -452,6 +492,7 @@ els.mobileSearchInput.addEventListener("input", (event) => setQuery(event.target
 els.mobileMenuButton.addEventListener("click", openSidebar);
 els.sidebarCloseButton.addEventListener("click", closeSidebar);
 els.sidebarBackdrop.addEventListener("click", closeSidebar);
+document.addEventListener("click", handleRouteClick);
 
 els.reader.addEventListener("click", (event) => {
   const preview = event.target.closest("[data-image-src]");
@@ -467,6 +508,13 @@ lightbox.addEventListener("click", (event) => {
   if (event.target === lightbox) closeLightbox();
 });
 document.addEventListener("keydown", (event) => {
+  if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey) {
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    if (!["input", "textarea"].includes(tag)) {
+      event.preventDefault();
+      els.searchInput.focus();
+    }
+  }
   if (event.key === "Escape") {
     if (!lightbox.hidden) closeLightbox();
     closeSidebar();
