@@ -4,16 +4,26 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>长发小寨 AI 总控台</title>
-    <link rel="stylesheet" href="./styles.css?v=20260707-dashboard-redesign">
+    <link rel="stylesheet" href="./styles.css?v=20260709-nendo-white">
   </head>
   <body>
-    <div class="mobile-topbar">
-      <button id="mobileMenuButton" type="button" class="menu-button" aria-label="打开文档目录">目录</button>
-      <div class="mobile-brand">
-        <span>长发小寨 AI 总控台</span>
-        <small id="mobileDocGroup">文档库</small>
-      </div>
-    </div>
+    <header class="site-header" aria-label="总控台顶部导航">
+      <button id="mobileMenuButton" type="button" class="site-index-button" aria-label="打开文档目录">index</button>
+      <a class="site-brand" href="./" aria-label="长发小寨 AI 总控台首页">
+        <span class="site-mark">cx</span>
+        <span>
+          <strong>长发小寨 AI 总控台</strong>
+          <small id="mobileDocGroup">文档库</small>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="快速入口">
+        <button type="button" data-route-group="总控导航">overview</button>
+        <button type="button" data-route-group="AI项目执行">works</button>
+        <button type="button" data-route-query="0703">0703</button>
+        <button type="button" data-route-group="模板库">templates</button>
+        <button type="button" data-route-group="Jessie Skill库">skills</button>
+      </nav>
+    </header>
 
     <div id="sidebarBackdrop" class="sidebar-backdrop" hidden></div>
 
@@ -53,12 +63,12 @@
         <section class="route-panel" aria-label="常用入口">
           <div class="section-label">常用入口</div>
           <div class="route-grid">
-            <button type="button" data-route-group="总控导航"><span>01</span>总览</button>
-            <button type="button" data-route-group="AI项目执行"><span>02</span>AI项目</button>
-            <button type="button" data-route-query="0703"><span>03</span>0703素材</button>
-            <button type="button" data-route-group="电商资料库"><span>04</span>资料库</button>
-            <button type="button" data-route-group="模板库"><span>05</span>模板</button>
-            <button type="button" data-route-group="Jessie Skill库"><span>06</span>Skill</button>
+            <button type="button" data-route-group="总控导航">总览</button>
+            <button type="button" data-route-group="AI项目执行">AI项目</button>
+            <button type="button" data-route-query="0703">0703素材</button>
+            <button type="button" data-route-group="电商资料库">资料库</button>
+            <button type="button" data-route-group="模板库">模板</button>
+            <button type="button" data-route-group="Jessie Skill库">Skill</button>
           </div>
         </section>
 
@@ -106,7 +116,7 @@
       </main>
     </div>
 
-    <script src="./content.js?v=20260707-dashboard-redesign"></script>
-    <script src="./app.js?v=20260707-dashboard-redesign"></script>
+    <script src="./content.js?v=20260709-nendo-white"></script>
+    <script src="./app.js?v=20260709-nendo-white"></script>
   </body>
 </html>

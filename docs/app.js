@@ -118,8 +118,12 @@ function resetContent(doc) {
   setStatus("已恢复原文");
 }
 
+function displayText(value) {
+  return String(value).replace(/[\u2014\u2013]/g, "-");
+}
+
 function escapeHtml(value) {
-  return String(value)
+  return displayText(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -346,11 +350,11 @@ function renderDocument() {
   if (!doc) return;
   const content = getContent(doc);
   state.currentId = doc.id;
-  els.docGroup.textContent = doc.group;
-  els.mobileDocGroup.textContent = doc.group;
-  els.pageNumber.textContent = doc.number || "--";
-  els.docTitle.textContent = doc.title;
-  els.docPath.textContent = doc.path;
+  els.docGroup.textContent = displayText(doc.group);
+  els.mobileDocGroup.textContent = displayText(doc.group);
+  els.pageNumber.textContent = displayText(doc.number || "--");
+  els.docTitle.textContent = displayText(doc.title);
+  els.docPath.textContent = displayText(doc.path);
   els.reader.innerHTML = markdownToHtml(content);
   els.editor.value = content;
   els.reader.hidden = state.mode !== "view";
@@ -409,7 +413,7 @@ function downloadCurrent() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${doc.title.replace(/[\\/:*?"<>|]/g, "-")}.md`;
+  link.download = `${displayText(doc.title).replace(/[\\/:*?"<>|]/g, "-")}.md`;
   document.body.appendChild(link);
   link.click();
   link.remove();
