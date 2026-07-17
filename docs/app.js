@@ -1,4 +1,5 @@
 const docs = window.CHANGFA_DOCS || [];
+const visualAssets = window.CHANGFA_VISUAL_ASSETS || [];
 const REPO_EDIT_BASE = "https://github.com/a295415099-ux/changfa-xiaozhai-ai/edit/main/";
 const APP_STORAGE_VERSION = "20260707-dashboard-redesign";
 const GROUP_ORDER = [
@@ -11,6 +12,20 @@ const GROUP_ORDER = [
   "竞品分析",
   "Jessie Skill库",
 ];
+const VISUAL_TYPE_META = {
+  hero: {
+    title: "首图",
+    description: "按产品、平台和版本查看主图、搜索首图、货架图及点击数据。",
+  },
+  detail: {
+    title: "商详页",
+    description: "阅读完整商详长图，对照卖点结构、承接表现和转化数据。",
+  },
+  home: {
+    title: "平台首页",
+    description: "集中查看天猫、淘宝、京东、抖音等平台首页及版本变化。",
+  },
+};
 
 const state = {
   currentId: docs[0]?.id || null,
@@ -18,6 +33,13 @@ const state = {
   query: "",
   activeGroup: "全部",
   lightboxMode: "fit",
+  surface: "document",
+  visualType: "hero",
+  visualProduct: "全部产品",
+  visualPlatform: "全部平台",
+  visualStatus: "全部状态",
+  visualCollectionId: null,
+  visualMediaIndex: 0,
 };
 
 const els = {
@@ -26,6 +48,9 @@ const els = {
   mobileMenuButton: document.getElementById("mobileMenuButton"),
   sidebarCloseButton: document.getElementById("sidebarCloseButton"),
   mobileDocGroup: document.getElementById("mobileDocGroup"),
+  commandPanel: document.getElementById("commandPanel"),
+  mobileSearchPanel: document.getElementById("mobileSearchPanel"),
+  statusStrip: document.getElementById("statusStrip"),
   totalDocs: document.getElementById("totalDocs"),
   totalGroups: document.getElementById("totalGroups"),
   resultCount: document.getElementById("resultCount"),
@@ -50,6 +75,18 @@ const els = {
   saveButton: document.getElementById("saveButton"),
   saveStatus: document.getElementById("saveStatus"),
   editorHint: document.getElementById("editorHint"),
+  visualWorkspace: document.getElementById("visualWorkspace"),
+  visualWorkspaceTitle: document.getElementById("visualWorkspaceTitle"),
+  visualWorkspaceDescription: document.getElementById("visualWorkspaceDescription"),
+  visualResultCount: document.getElementById("visualResultCount"),
+  visualFilteredCount: document.getElementById("visualFilteredCount"),
+  visualProductFilter: document.getElementById("visualProductFilter"),
+  visualPlatformFilter: document.getElementById("visualPlatformFilter"),
+  visualStatusFilter: document.getElementById("visualStatusFilter"),
+  visualEmptyState: document.getElementById("visualEmptyState"),
+  visualLayout: document.getElementById("visualLayout"),
+  visualCollectionList: document.getElementById("visualCollectionList"),
+  visualViewer: document.getElementById("visualViewer"),
 };
 
 const groups = [
@@ -345,9 +382,214 @@ function renderNav() {
     .join("");
 }
 
+function setVisualOptions(select, allLabel, values, currentValue) {
+  const options = [allLabel, ...Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b, "zh-CN"))];
+  const selected = options.includes(currentValue) ? currentValue : allLabel;
+  select.innerHTML = options
+    .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
+    .join("");
+  select.value = selected;
+  return selected;
+}
+
+function getVisualCollectionsByType() {
+  return visualAssets
+    .filter((collection) => collection.type === state.visualType)
+    .sort((a, b) => `${b.date || ""} ${b.version || ""}`.localeCompare(`${a.date || ""} ${a.version || ""}`, "zh-CN"));
+}
+
+function getFilteredVisualCollections() {
+  return getVisualCollectionsByType().filter((collection) => {
+    const productMatch = state.visualProduct === "全部产品" || collection.product === state.visualProduct;
+    const platformMatch = state.visualPlatform === "全部平台" || collection.platform === state.visualPlatform;
+    const statusMatch = state.visualStatus === "全部状态" || collection.status === state.visualStatus;
+    return productMatch && platformMatch && statusMatch;
+  });
+}
+
+function visualMediaPreview(media, title) {
+  if (!media) return '<span class="visual-preview-placeholder">待上传</span>';
+  if (media.kind === "video") {
+    return `<span class="visual-preview-placeholder">视频</span>`;
+  }
+  return `<img src="${escapeHtml(media.src)}" alt="${escapeHtml(title)}" loading="lazy">`;
+}
+
+function renderVisualCollectionList(collections) {
+  els.visualCollectionList.innerHTML = collections.map((collection) => {
+    const selected = collection.id === state.visualCollectionId ? " selected" : "";
+    const firstMedia = collection.media?.[0];
+    return `
+      <button class="visual-collection-card${selected}" type="button" data-visual-collection-id="${escapeHtml(collection.id)}">
+        <span class="visual-collection-preview">${visualMediaPreview(firstMedia, collection.version)}</span>
+        <span class="visual-collection-copy">
+          <strong>${escapeHtml(collection.product)}</strong>
+          <span>${escapeHtml(collection.platform)} / ${escapeHtml(collection.version)}</span>
+          <small>${escapeHtml(collection.date || "日期待补")} / ${escapeHtml(collection.status || "待整理")}</small>
+        </span>
+      </button>
+    `;
+  }).join("");
+}
+
+function metricValue(metric, chineseKey, englishKey) {
+  return metric?.[chineseKey] ?? metric?.[englishKey] ?? "";
+}
+
+function renderVisualMetrics(metrics) {
+  if (!metrics?.length) {
+    return `
+      <div class="visual-data-empty">
+        <strong>暂未录入数据</strong>
+        <span>在版本文件夹加入 _数据.csv 后，会在这里显示上线前后对比。</span>
+      </div>
+    `;
+  }
+  const rows = metrics.map((metric) => `
+    <tr>
+      <th>${escapeHtml(metricValue(metric, "指标", "label") || "待定义")}</th>
+      <td>${escapeHtml(metricValue(metric, "上线前", "before") || "待补")}</td>
+      <td>${escapeHtml(metricValue(metric, "上线后", "after") || "待补")}</td>
+      <td>${escapeHtml(metricValue(metric, "变化", "change") || "待复盘")}</td>
+      <td>${escapeHtml(metricValue(metric, "结论", "conclusion") || "")}</td>
+    </tr>
+  `).join("");
+  return `
+    <div class="visual-data-table-wrap">
+      <table class="visual-data-table">
+        <thead><tr><th>指标</th><th>上线前</th><th>上线后</th><th>变化</th><th>结论</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderVisualViewer(collection) {
+  if (!collection) {
+    els.visualViewer.innerHTML = "";
+    return;
+  }
+  const media = collection.media || [];
+  const safeIndex = Math.min(state.visualMediaIndex, Math.max(media.length - 1, 0));
+  state.visualMediaIndex = safeIndex;
+  const activeMedia = media[safeIndex];
+  const stage = activeMedia?.kind === "video"
+    ? `<video src="${escapeHtml(activeMedia.src)}" controls preload="metadata"></video>`
+    : activeMedia
+      ? `<button class="visual-stage-open" type="button" data-visual-image-src="${escapeHtml(activeMedia.src)}" data-visual-image-title="${escapeHtml(activeMedia.title || collection.version)}" aria-label="全屏查看 ${escapeHtml(activeMedia.title || collection.version)}"><img src="${escapeHtml(activeMedia.src)}" alt="${escapeHtml(activeMedia.title || collection.version)}"></button>`
+      : '<div class="visual-stage-missing">这个版本还没有上传画面</div>';
+  const mediaStrip = media.length > 1
+    ? `<div class="visual-media-strip">${media.map((item, index) => `
+        <button class="visual-media-thumb${index === safeIndex ? " active" : ""}" type="button" data-visual-media-index="${index}" aria-label="查看第 ${index + 1} 张">
+          ${visualMediaPreview(item, item.title || `${collection.version} ${index + 1}`)}
+          <span>${String(index + 1).padStart(2, "0")}</span>
+        </button>
+      `).join("")}</div>`
+    : "";
+
+  els.visualViewer.innerHTML = `
+    <header class="visual-viewer-header">
+      <div>
+        <p>${escapeHtml(collection.project || "待关联项目")}</p>
+        <h3>${escapeHtml(collection.product)} / ${escapeHtml(collection.version)}</h3>
+      </div>
+      <dl class="visual-meta-list">
+        <div><dt>平台</dt><dd>${escapeHtml(collection.platform || "待补")}</dd></div>
+        <div><dt>日期</dt><dd>${escapeHtml(collection.date || "待补")}</dd></div>
+        <div><dt>状态</dt><dd>${escapeHtml(collection.status || "待整理")}</dd></div>
+        <div><dt>画面</dt><dd>${media.length}</dd></div>
+      </dl>
+      ${collection.note ? `<p class="visual-note">${escapeHtml(collection.note)}</p>` : ""}
+    </header>
+    ${mediaStrip}
+    <div class="visual-stage">${stage}</div>
+    <section class="visual-data-section">
+      <div class="visual-data-heading">
+        <h4>版本数据</h4>
+        <p>用同口径的上线前后数据判断下一版保留什么、修改什么。</p>
+      </div>
+      ${renderVisualMetrics(collection.metrics)}
+    </section>
+  `;
+}
+
+function updateSurfaceButtons() {
+  document.querySelectorAll("[data-visual-type]").forEach((button) => {
+    button.classList.toggle("active", state.surface === "visual" && button.dataset.visualType === state.visualType);
+  });
+}
+
+function renderVisualWorkspace() {
+  const meta = VISUAL_TYPE_META[state.visualType];
+  const allCollections = getVisualCollectionsByType();
+  state.visualProduct = setVisualOptions(
+    els.visualProductFilter,
+    "全部产品",
+    allCollections.map((collection) => collection.product),
+    state.visualProduct,
+  );
+  state.visualPlatform = setVisualOptions(
+    els.visualPlatformFilter,
+    "全部平台",
+    allCollections.map((collection) => collection.platform),
+    state.visualPlatform,
+  );
+  state.visualStatus = setVisualOptions(
+    els.visualStatusFilter,
+    "全部状态",
+    allCollections.map((collection) => collection.status),
+    state.visualStatus,
+  );
+
+  const collections = getFilteredVisualCollections();
+  if (!collections.some((collection) => collection.id === state.visualCollectionId)) {
+    state.visualCollectionId = collections[0]?.id || null;
+    state.visualMediaIndex = 0;
+  }
+  const selected = collections.find((collection) => collection.id === state.visualCollectionId);
+
+  els.visualWorkspace.dataset.type = state.visualType;
+  els.visualWorkspaceTitle.textContent = meta.title;
+  els.visualWorkspaceDescription.textContent = meta.description;
+  els.visualResultCount.textContent = allCollections.length;
+  els.visualFilteredCount.textContent = collections.length;
+  els.visualEmptyState.hidden = collections.length > 0;
+  els.visualLayout.hidden = collections.length === 0;
+  renderVisualCollectionList(collections);
+  renderVisualViewer(selected);
+  updateSurfaceButtons();
+}
+
+function showVisualWorkspace(type) {
+  if (!VISUAL_TYPE_META[type]) return;
+  state.surface = "visual";
+  state.visualType = type;
+  state.visualProduct = "全部产品";
+  state.visualPlatform = "全部平台";
+  state.visualStatus = "全部状态";
+  state.visualCollectionId = null;
+  state.visualMediaIndex = 0;
+  document.body.classList.add("visual-mode");
+  els.commandPanel.hidden = true;
+  els.mobileSearchPanel.hidden = true;
+  els.statusStrip.hidden = true;
+  els.reader.hidden = true;
+  els.editorPanel.hidden = true;
+  els.visualWorkspace.hidden = false;
+  els.mobileDocGroup.textContent = VISUAL_TYPE_META[type].title;
+  renderVisualWorkspace();
+  els.visualWorkspace.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 function renderDocument() {
   const doc = getDoc(state.currentId);
   if (!doc) return;
+  state.surface = "document";
+  document.body.classList.remove("visual-mode");
+  els.visualWorkspace.hidden = true;
+  els.commandPanel.hidden = false;
+  els.mobileSearchPanel.hidden = false;
+  els.statusStrip.hidden = false;
   const content = getContent(doc);
   state.currentId = doc.id;
   els.docGroup.textContent = displayText(doc.group);
@@ -361,6 +603,7 @@ function renderDocument() {
   els.editorPanel.hidden = state.mode !== "edit";
   els.viewButton.classList.toggle("active", state.mode === "view");
   els.editButton.classList.toggle("active", state.mode === "edit");
+  updateSurfaceButtons();
   renderNav();
 }
 
@@ -467,8 +710,11 @@ function handleFilterClick(event) {
 }
 
 function handleRouteClick(event) {
-  const button = event.target.closest("[data-route-group], [data-route-query]");
+  const button = event.target.closest("[data-route-group], [data-route-query], [data-visual-type]");
   if (!button) return;
+  if (button.dataset.visualType) {
+    showVisualWorkspace(button.dataset.visualType);
+  }
   if (button.dataset.routeGroup) {
     setGroup(button.dataset.routeGroup);
   }
@@ -497,6 +743,44 @@ els.mobileMenuButton.addEventListener("click", openSidebar);
 els.sidebarCloseButton.addEventListener("click", closeSidebar);
 els.sidebarBackdrop.addEventListener("click", closeSidebar);
 document.addEventListener("click", handleRouteClick);
+
+els.visualProductFilter.addEventListener("change", (event) => {
+  state.visualProduct = event.target.value;
+  state.visualCollectionId = null;
+  state.visualMediaIndex = 0;
+  renderVisualWorkspace();
+});
+els.visualPlatformFilter.addEventListener("change", (event) => {
+  state.visualPlatform = event.target.value;
+  state.visualCollectionId = null;
+  state.visualMediaIndex = 0;
+  renderVisualWorkspace();
+});
+els.visualStatusFilter.addEventListener("change", (event) => {
+  state.visualStatus = event.target.value;
+  state.visualCollectionId = null;
+  state.visualMediaIndex = 0;
+  renderVisualWorkspace();
+});
+els.visualCollectionList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-visual-collection-id]");
+  if (!button) return;
+  state.visualCollectionId = button.dataset.visualCollectionId;
+  state.visualMediaIndex = 0;
+  renderVisualWorkspace();
+});
+els.visualViewer.addEventListener("click", (event) => {
+  const mediaButton = event.target.closest("[data-visual-media-index]");
+  if (mediaButton) {
+    state.visualMediaIndex = Number(mediaButton.dataset.visualMediaIndex) || 0;
+    renderVisualWorkspace();
+    return;
+  }
+  const imageButton = event.target.closest("[data-visual-image-src]");
+  if (imageButton) {
+    openLightbox(imageButton.dataset.visualImageSrc, imageButton.dataset.visualImageTitle);
+  }
+});
 
 els.reader.addEventListener("click", (event) => {
   const preview = event.target.closest("[data-image-src]");
